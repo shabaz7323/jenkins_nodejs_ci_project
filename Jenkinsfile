@@ -1,30 +1,40 @@
 pipeline {
-  agent any
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
+    agent any
+
+    tools {
+        nodejs 'Node16'
     }
-    stage('Install Dependencies') {
-      steps {
-        sh 'npm install'
-      }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                bat 'npm install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat 'npm test'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'node app.js'
+            }
+        }
     }
-    stage('Run Tests') {
-      steps {
-        sh 'npm test'
-      }
+
+    post {
+        success {
+            echo 'Build completed successfully!'
+        }
     }
-    stage('Build') {
-      steps {
-        sh 'npm run start &'
-      }
-    }
-  }
-  post {
-    success {
-      echo 'Build completed successfully!'
-    }
-  }
 }
