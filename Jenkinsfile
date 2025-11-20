@@ -1,0 +1,30 @@
+pipeline {
+  agent any
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+    stage('Install Dependencies') {
+      steps {
+        sh 'npm install'
+      }
+    }
+    stage('Run Tests') {
+      steps {
+        sh 'npm test'
+      }
+    }
+    stage('Build') {
+      steps {
+        sh 'npm run start &'
+      }
+    }
+  }
+  post {
+    success {
+      echo 'Build completed successfully!'
+    }
+  }
+}
