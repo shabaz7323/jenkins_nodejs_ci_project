@@ -1,40 +1,42 @@
 pipeline {
     agent any
-    
-    tools {
-        nodejs 'Node16'
+
+    environment {
+        IMAGE = "shabaz7323/jenkins-node-app"
+        TAG = "${env.BUILD_NUMBER}"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                bat 'npm install'
+                echo "Building Docker image: ${IMAGE}:${TAG}"
+                bat "docker build -t %IMAGE%:%TAG% ."
+                bat "docker tag %IMAGE%:%TAG% %IMAGE%:latest"
             }
         }
-
-        stage('Run Tests') {
+        stage('Login & Push to Docker Hub') {
             steps {
-                bat 'npm test'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Build completed successfully. (Not starting server)'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                    bat 'echo Logging in to Docker Hub...'
+                    bat "docker login -u %DOCKERHUB_USER% -p %DOCKERHUB_PASS%"
+                    bat "docker push %IMAGE%:%TAG%"
+                    bat "docker push %IMAGE%:latest"
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline Success'
+            echo "Docker image pushed: ${IMAGE}:${TAG}"
+        }
+        failure {
+            echo "Build failed."
         }
     }
 }
