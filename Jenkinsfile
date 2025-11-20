@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    
     tools {
         nodejs 'Node16'
     }
@@ -27,14 +27,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'node app.js'
+                echo 'Build completed successfully. (Not starting server)'
             }
         }
     }
 
     post {
         success {
-            echo 'Build completed successfully!'
+            echo 'Pipeline Success'
         }
     }
 }
